@@ -4,3 +4,7 @@ __pycache__/
 *.py[cod]
 outputs/*.pdf
 outputs/*.docx
+build/
+dist/
+release/
+*.spec

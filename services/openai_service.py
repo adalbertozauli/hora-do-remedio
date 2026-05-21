@@ -1,4 +1,6 @@
 import os
+import sys
+from pathlib import Path
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -41,7 +43,7 @@ Formato obrigatório:
 
 
 def structure_prescription_text(text: str) -> str:
-    load_dotenv()
+    _load_environment()
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
     if not api_key:
         raise MissingOpenAIKeyError(
@@ -71,3 +73,14 @@ def structure_prescription_text(text: str) -> str:
     )
 
     return response.choices[0].message.content or ""
+
+
+def _load_environment() -> None:
+    load_dotenv()
+
+    if getattr(sys, "frozen", False):
+        app_dir = Path(sys.executable).resolve().parent
+    else:
+        app_dir = Path(__file__).resolve().parents[1]
+
+    load_dotenv(app_dir / ".env", override=False)
