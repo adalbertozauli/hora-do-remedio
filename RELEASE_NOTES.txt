@@ -1,10 +1,10 @@
-Hora do Remédio - pacote para Windows
+Hora do Remédio - instalador para Windows
 
 Como usar:
-1. Extraia o arquivo .zip.
-2. Renomeie .env.example para .env.
-3. Abra o .env e preencha OPENAI_API_KEY.
-4. Execute HoraDoRemedio.exe.
+1. Execute HoraDoRemedioSetup.exe.
+2. O instalador criará atalhos na Área de Trabalho e no Menu Iniciar.
+3. Abra o aplicativo.
+4. Clique em "Configurar chave da API" e cole sua chave da OpenAI.
 
 Observação:
 O aplicativo precisa de internet e de uma chave da OpenAI para interpretar receitas automaticamente.

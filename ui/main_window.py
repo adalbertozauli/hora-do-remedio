@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (
     QFileDialog,
     QHBoxLayout,
     QHeaderView,
+    QInputDialog,
     QLabel,
     QLineEdit,
     QMainWindow,
@@ -23,6 +24,7 @@ from PySide6.QtWidgets import (
 
 from models.medication import Medication, REVIEW_LABEL, VALID_PERIODS
 from services.doc_reader import extract_text_from_docx
+from services.config_service import save_openai_key, user_env_path
 from services.medication_parser import medications_to_json, parse_medications_json
 from services.openai_service import MissingOpenAIKeyError, structure_prescription_text
 from services.pdf_generator import export_medications_pdf
@@ -67,6 +69,7 @@ class MainWindow(QMainWindow):
         self.setStyleSheet(APP_STYLE)
 
         self.import_button = QPushButton("Importar receita .docx")
+        self.api_key_button = QPushButton("Configurar chave da API")
         self.copy_button = QPushButton("Copiar resultado")
         self.export_button = QPushButton("Exportar PDF")
 
@@ -114,6 +117,7 @@ class MainWindow(QMainWindow):
         actions = QHBoxLayout()
         actions.setSpacing(12)
         actions.addWidget(self.import_button)
+        actions.addWidget(self.api_key_button)
         actions.addWidget(self.copy_button)
         actions.addWidget(self.export_button)
         actions.addStretch()
@@ -154,8 +158,29 @@ class MainWindow(QMainWindow):
 
     def _connect_actions(self) -> None:
         self.import_button.clicked.connect(self.import_docx)
+        self.api_key_button.clicked.connect(self.configure_api_key)
         self.copy_button.clicked.connect(self.copy_result)
         self.export_button.clicked.connect(self.export_pdf)
+
+    def configure_api_key(self) -> None:
+        api_key, ok = QInputDialog.getText(
+            self,
+            "Configurar chave da API",
+            "Cole a chave da OpenAI:",
+            QLineEdit.Password,
+        )
+        if not ok:
+            return
+        if not api_key.strip():
+            QMessageBox.warning(self, "Chave vazia", "Informe uma chave da OpenAI para salvar.")
+            return
+
+        env_path = save_openai_key(api_key)
+        QMessageBox.information(
+            self,
+            "Chave salva",
+            f"A chave foi salva com sucesso.\n\nArquivo de configuração:\n{env_path}",
+        )
 
     def import_docx(self) -> None:
         file_path, _ = QFileDialog.getOpenFileName(
@@ -365,7 +390,7 @@ class MainWindow(QMainWindow):
         return item.text().strip() if item else ""
 
     def _set_busy(self, busy: bool, message: str | None = None) -> None:
-        for button in (self.import_button, self.copy_button, self.export_button):
+        for button in (self.import_button, self.api_key_button, self.copy_button, self.export_button):
             button.setDisabled(busy)
         if message:
             self.statusBar().showMessage(message)

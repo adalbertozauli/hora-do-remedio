@@ -1,9 +1,8 @@
 import os
-import sys
-from pathlib import Path
 
-from dotenv import load_dotenv
 from openai import OpenAI
+
+from services.config_service import load_app_environment, user_env_path
 
 
 class MissingOpenAIKeyError(RuntimeError):
@@ -43,14 +42,14 @@ Formato obrigatório:
 
 
 def structure_prescription_text(text: str) -> str:
-    _load_environment()
+    load_app_environment()
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
     if not api_key:
         raise MissingOpenAIKeyError(
             "O texto da receita foi extraído, mas a tabela automática precisa da chave da OpenAI.\n\n"
-            "Abra o arquivo .env e preencha:\n"
-            "OPENAI_API_KEY=sua_chave_aqui\n\n"
-            "Depois feche e abra o aplicativo novamente."
+            "Clique em 'Configurar chave da API' no aplicativo ou crie o arquivo:\n"
+            f"{user_env_path()}\n\n"
+            "com a linha OPENAI_API_KEY=sua_chave_aqui."
         )
 
     model = os.getenv("OPENAI_MODEL", "gpt-4o-mini").strip() or "gpt-4o-mini"
@@ -73,14 +72,3 @@ def structure_prescription_text(text: str) -> str:
     )
 
     return response.choices[0].message.content or ""
-
-
-def _load_environment() -> None:
-    load_dotenv()
-
-    if getattr(sys, "frozen", False):
-        app_dir = Path(sys.executable).resolve().parent
-    else:
-        app_dir = Path(__file__).resolve().parents[1]
-
-    load_dotenv(app_dir / ".env", override=False)

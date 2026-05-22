@@ -7,4 +7,5 @@ outputs/*.docx
 build/
 dist/
 release/
+tools/
 *.spec
